@@ -9,6 +9,12 @@ from sklearn.metrics import mean_squared_error
 
 if os.path.exists('./dataset.csv'):
     df = pd.read_csv('dataset.csv', index_col='Date')
+
+with st.sidebar:
+    st.image("https://www.onepointltd.com/wp-content/uploads/2020/03/inno2.png")
+    st.title("AutoNickML")
+    choice = st.radio("Navigation", ["Upload","Profiling","Modelling", "Download"])
+    st.info("This project application helps you build and explore your data.")
 """
 st.title('Voltage Forecasting using ARIMA')
 st.write('This app uses ARIMA model to forecast the Voltage .')
