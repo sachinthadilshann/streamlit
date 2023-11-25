@@ -1,3 +1,4 @@
+import os
 
 import streamlit as st
 import pandas as pd
@@ -6,6 +7,9 @@ import matplotlib.pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_squared_error
 
+if os.path.exists('./dataset.csv'):
+    df = pd.read_csv('dataset.csv', index_col='Date')
+"""
 st.title('Voltage Forecasting using ARIMA')
 st.write('This app uses ARIMA model to forecast the Voltage .')
 data = st.file_uploader('Upload a CSV file(Data,Voltage) only ', type='csv')
@@ -108,3 +112,5 @@ if data is not None:
     ax.set_ylabel('Voltage')
     ax.legend()
     st.pyplot(fig)
+    
+"""
