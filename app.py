@@ -84,7 +84,7 @@ if data is not None:
     st.write('Future forecast for the next', future_steps, 'hours:')
     st.write(future_forecast)
 
-    # Plot the future forecast
+
     #st.subheader('Future Forecast Plot')
     #fig, ax = plt.subplots(figsize=(20, 8))
     #ax.plot(df['Voltage'], label='Historical Data')
