@@ -1,5 +1,4 @@
-import os
-
+# Import libraries
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -7,15 +6,6 @@ import matplotlib.pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_squared_error
 
-if os.path.exists('./dataset.csv'):
-    df = pd.read_csv('dataset.csv', index_col='Date')
-
-with st.sidebar:
-    st.image("https://www.onepointltd.com/wp-content/uploads/2020/03/inno2.png")
-    st.title("AutoNickML")
-    choice = st.radio("Navigation", ["Upload","Profiling","Modelling", "Download"])
-    st.info("This project application helps you build and explore your data.")
-"""
 st.title('Voltage Forecasting using ARIMA')
 st.write('This app uses ARIMA model to forecast the Voltage .')
 data = st.file_uploader('Upload a CSV file(Data,Voltage) only ', type='csv')
@@ -33,6 +23,7 @@ if data is not None:
     ax.legend()
     st.pyplot(fig)
 
+    # Split the data into train and test sets
     st.subheader('Train and Test Sets')
     split = st.slider('Select the train-test split ratio', 0.5, 0.9, 0.8, 0.01)
     train_size = int(len(df) * split)
@@ -51,12 +42,16 @@ if data is not None:
 
     st.subheader('Forecast')
     steps = st.number_input('Enter the number of steps to forecast', 1, len(test), 10)
-
+    # Get the forecast object
     forecast_obj = model_fit.get_forecast(steps, alpha=0.05)
 
     # Access the forecasted series
     forecast = forecast_obj.predicted_mean
+
+    # Access the standard error
     se = forecast_obj.se_mean
+
+    # Access the confidence interval
     conf = forecast_obj.conf_int()
 
     st.write('Forecasted temperature for the next', steps, 'days:')
@@ -81,14 +76,14 @@ if data is not None:
     ax.legend()
     st.pyplot(fig)
 
-    # Future Predictions
+ """ # Future Predictions
     st.subheader('Future Predictions')
     future_steps = st.number_input('Enter the number of future steps to predict', 1, 100, 10)
     future_forecast_obj = model_fit.get_forecast(future_steps, alpha=0.05)
     future_forecast = future_forecast_obj.predicted_mean
     future_conf = future_forecast_obj.conf_int()
     st.write('Future forecast for the next', future_steps, 'days:')
-    st.write(future_forecast)
+    st.write(future_forecast)         """
 
     # Plot the future forecast
     st.subheader('Future Forecast Plot')
@@ -102,9 +97,8 @@ if data is not None:
     st.pyplot(fig)
 
     st.subheader('Original Data Plot')
-    fig, ax = plt.subplots(figsize=(20, 8))
-    ax.plot(train['Voltage'], label='Train')
-    ax.plot(test['Voltage'], label='Test')
+    fig, ax = plt.subplots(figsize=(20, 6))
+    ax.plot(df['Voltage'], label='Voltage')
     ax.set_xlabel('Date')
     ax.set_ylabel('Voltage')
     ax.legend()
@@ -118,5 +112,3 @@ if data is not None:
     ax.set_ylabel('Voltage')
     ax.legend()
     st.pyplot(fig)
-    
-"""
