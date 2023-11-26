@@ -105,7 +105,7 @@ if data is not None:
 
     st.subheader('Forecast Plot')
     fig, ax = plt.subplots(figsize=(20, 8))
-    ax.plot(forecast, label='Forecast')
+    ax.plot(future_forecast, label='Future Forecast')
     #ax.fill_between(conf.index, conf.iloc[:, 0], conf.iloc[:, 1], color='k', alpha=.15, label='Confidence Interval')
     ax.set_xlabel('Date')
     ax.set_ylabel('Voltage')
