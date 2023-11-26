@@ -72,18 +72,17 @@ if data is not None:
     ax.plot(forecast, label='Forecast')
     ax.fill_between(conf.index, conf.iloc[:, 0], conf.iloc[:, 1], color='k', alpha=.15, label='Confidence Interval')
     ax.set_xlabel('Date')
-    ax.set_ylabel('Temperature (°C)')
+    ax.set_ylabel('Voltage (°C)')
     ax.legend()
     st.pyplot(fig)
 
- """ # Future Predictions
     st.subheader('Future Predictions')
     future_steps = st.number_input('Enter the number of future steps to predict', 1, 100, 10)
     future_forecast_obj = model_fit.get_forecast(future_steps, alpha=0.05)
     future_forecast = future_forecast_obj.predicted_mean
     future_conf = future_forecast_obj.conf_int()
     st.write('Future forecast for the next', future_steps, 'days:')
-    st.write(future_forecast)         """
+    st.write(future_forecast)
 
     # Plot the future forecast
     st.subheader('Future Forecast Plot')
