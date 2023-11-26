@@ -75,7 +75,7 @@ if data is not None:
         fig, ax = plt.subplots(figsize=(20, 8))
         ax.plot(df['Voltage'], label='Historical Data')
         ax.plot(future_forecast, label='Future Forecast')
-        ax.fill_between(future_conf.index, future_conf.iloc[:, 0], future_conf.iloc[:, 1], color='k', alpha=.15, label='Confidence Interval')
+        #ax.fill_between(future_conf.index, future_conf.iloc[:, 0], future_conf.iloc[:, 1], color='k', alpha=.15, label='Confidence Interval')
         ax.set_xlabel('Date')
         ax.set_ylabel('Voltage')
         ax.legend()
