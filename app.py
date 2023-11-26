@@ -1,4 +1,4 @@
-# Import libraries
+import time
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -77,11 +77,11 @@ if data is not None:
     st.pyplot(fig)
 
     st.subheader('Future Predictions')
-    future_steps = st.number_input('Enter the number of future steps to predict', 1, 100, 10)
+    future_steps = st.number_input('Enter the number of future steps to predict', 1, 1000, 10)
     future_forecast_obj = model_fit.get_forecast(future_steps, alpha=0.05)
     future_forecast = future_forecast_obj.predicted_mean
     future_conf = future_forecast_obj.conf_int()
-    st.write('Future forecast for the next', future_steps, 'days:')
+    st.write('Future forecast for the next', future_steps, 'hours:')
     st.write(future_forecast)
 
     # Plot the future forecast
