@@ -42,29 +42,20 @@ if data is not None:
 
     st.subheader('Forecast')
     steps = st.number_input('Enter the number of steps to forecast', 1, len(test), 10)
-    # Get the forecast object
     forecast_obj = model_fit.get_forecast(steps, alpha=0.05)
-
-    # Access the forecasted series
     forecast = forecast_obj.predicted_mean
-
-    # Access the standard error
     se = forecast_obj.se_mean
-
-    # Access the confidence interval
     conf = forecast_obj.conf_int()
-
     st.write('Forecasted temperature for the next', steps, 'days:')
     st.write(forecast)
 
-    # Evaluate the model
+
     st.subheader('Evaluation')
     mse = mean_squared_error(test['Voltage'][:steps], forecast)
     rmse = np.sqrt(mse)
     st.write('Mean Squared Error:', mse)
     st.write('Root Mean Squared Error:', rmse)
 
-    # Plot the forecast
     st.subheader('Forecast Plot')
     fig, ax = plt.subplots(figsize=(20, 8))
     ax.plot(train['Voltage'], label='Train')
@@ -84,17 +75,6 @@ if data is not None:
     st.write('Future forecast for the next', future_steps, 'hours:')
     st.write(future_forecast)
 
-
-    #st.subheader('Future Forecast Plot')
-    #fig, ax = plt.subplots(figsize=(20, 8))
-    #ax.plot(df['Voltage'], label='Historical Data')
-    #ax.plot(future_forecast, label='Future Forecast')
-    #ax.fill_between(future_conf.index, future_conf.iloc[:, 0], future_conf.iloc[:, 1], color='k', alpha=.15, label='Confidence Interval')
-    #ax.set_xlabel('Date')
-    #ax.set_ylabel('Voltage')
-    #ax.legend()
-    #st.pyplot(fig)
-
     st.subheader('Original Data Plot')
     fig, ax = plt.subplots(figsize=(20, 6))
     ax.plot(df['Voltage'], label='Voltage')
@@ -106,7 +86,6 @@ if data is not None:
     st.subheader('Forecast Plot')
     fig, ax = plt.subplots(figsize=(20, 8))
     ax.plot(future_forecast, label='Future Forecast')
-    #ax.fill_between(conf.index, conf.iloc[:, 0], conf.iloc[:, 1], color='k', alpha=.15, label='Confidence Interval')
     ax.set_xlabel('Date')
     ax.set_ylabel('Voltage')
     ax.legend()
