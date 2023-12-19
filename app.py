@@ -1,3 +1,4 @@
+from datetime import datetime
 from datetime import time as dt_time
 import streamlit as st
 import pandas as pd
@@ -6,6 +7,7 @@ import statsmodels.api as sm
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 import numpy as np
+from statsmodels.tsa.arima.model import ARIMA  # Import ARIMA from statsmodels
 
 st.title('Voltage Forecasting using ARIMA')
 st.write('This app uses ARIMA model to forecast the Voltage.')
@@ -20,16 +22,16 @@ def load_data():
         data = response.json()
 
         solar_panel_id = '0001'
-        device_id = 'Current'
+        device_id = 'Voltage'  # Assuming the voltage data is under the 'Voltage' key
 
         # Extract the relevant nested data
         nested_data = data.get('solar_panel', {}).get(solar_panel_id, {}).get(device_id, {})
 
         # Convert the nested data to a dataframe
-        df = pd.DataFrame(list(nested_data.items()), columns=['Timestamp', 'Current'])
+        df = pd.DataFrame(list(nested_data.items()), columns=['Timestamp', 'Voltage'])
         df['Timestamp'] = pd.to_datetime(df['Timestamp'])
-        df['Current'] = pd.to_numeric(df['Current'], errors='coerce')  # Convert 'Current' to numeric
-        df = df.dropna(subset=['Current'])  # Drop rows with NaN in 'Current'
+        df['Voltage'] = pd.to_numeric(df['Voltage'], errors='coerce')  # Convert 'Voltage' to numeric
+        df = df.dropna(subset=['Voltage'])  # Drop rows with NaN in 'Voltage'
         df.set_index('Timestamp', inplace=True)  # Set 'Timestamp' as the index
 
         # Resample to 5-minute intervals
@@ -41,7 +43,6 @@ def load_data():
         return None
 
 # Add a sidebar with options
-
 image_url = "logo.png"
 st.sidebar.image(image_url)
 display_dataframe = st.sidebar.checkbox("Display Dataframe")
@@ -54,6 +55,8 @@ df = load_data()
 # Display dataframe if selected in the sidebar
 if display_dataframe and df is not None:
     st.subheader("Displaying Dataframe")
+
+    # Display the filtered dataframe
     st.write(df)
 
 # Plot dataframe in real-time with a rolling average if selected in the sidebar
@@ -63,18 +66,18 @@ if plot_dataframe and df is not None:
     # Create a placeholder for the chart
     chart_placeholder = st.empty()
 
-    while True:
+    while plot_dataframe:  # Continue plotting as long as the checkbox is selected
         # Reload data in a loop
-        df = load_data()
+        df_filtered = load_data()
 
-        if df is not None:
+        if df_filtered is not None:
             # Calculate a rolling average with a window size of 5
-            rolling_avg = df['Current'].rolling(window=5).mean()
+            rolling_avg = df_filtered['Voltage'].rolling(window=5).mean()
 
             # Clear the previous chart and update with the new data
             chart_placeholder.line_chart(rolling_avg, use_container_width=True)
 
-# Add ARIMA model fitting and forecasting section
+# Run ARIMA Forecast button logic
 if run_forecast_button:
     # Split the data into train and test sets
     st.subheader('Train and Test Sets')
@@ -82,48 +85,44 @@ if run_forecast_button:
     train_size = int(len(df) * split)
     train, test = df.iloc[:train_size], df.iloc[train_size:]
 
-    st.write('Train set size:', len(train))
-    st.write('Test set size:', len(test))
-
     # Fit the ARIMA model
     st.subheader('ARIMA Model')
     p = st.number_input('Enter the order of AR term', 0, 10, 5)
     d = st.number_input('Enter the degree of differencing', 0, 10, 1)
     q = st.number_input('Enter the order of MA term', 0, 10, 0)
-    model = sm.tsa.ARIMA(train['Current'], order=(p, d, q))
+
+    # Create and fit the ARIMA model
+    model = ARIMA(train['Voltage'], order=(p, d, q))
     model_fit = model.fit()
     st.write(model_fit.summary())
 
-    # Forecast for the next steps
+    # Forecast
     st.subheader('Forecast')
     steps = st.number_input('Enter the number of steps to forecast', 1, len(test), 10)
-    forecast = model_fit.get_forecast(steps=steps)
-    forecast_values = forecast.predicted_mean
-    st.write('Forecasted current for the next', steps, 'steps:')
-    st.write(forecast_values)
+    forecast_obj = model_fit.get_forecast(steps, alpha=0.05)
+    forecast = forecast_obj.predicted_mean
+    se = forecast_obj.se_mean
+    conf = forecast_obj.conf_int()
+    st.write('Forecasted voltage for the next', steps, 'steps:')
+    st.write(forecast)
 
     # Evaluation
-    mse = mean_squared_error(test['Current'][:steps], forecast_values)
+    st.subheader('Evaluation')
+    mse = mean_squared_error(test['Voltage'][:steps], forecast)
     rmse = np.sqrt(mse)
     st.write('Mean Squared Error:', mse)
     st.write('Root Mean Squared Error:', rmse)
 
-
+    # Forecast Plot
     st.subheader('Forecast Plot')
     fig, ax = plt.subplots(figsize=(20, 8))
-    ax.plot(df['Current'], label='Original Data')
-    ax.plot(train['Current'], label='Train')
-    ax.plot(test['Current'], label='Test')
-
-    # Fix for TypeError: cannot add DatetimeArray and Timestamp
-    forecast_index = pd.date_range(start=test.index[-1], periods=steps + 1, freq='30S')[1:]
-    ax.plot(forecast_index, forecast_values, label='Forecast')
-
-    ax.set_xlabel('Timestamp')
-    ax.set_ylabel('Current')
+    ax.plot(train['Voltage'], label='Train')
+    ax.plot(test['Voltage'], label='Test')
+    ax.plot(forecast.index, forecast.values, label='Forecast')
+    ax.fill_between(conf.index, conf.iloc[:, 0], conf.iloc[:, 1], color='k', alpha=0.2, label='Confidence Interval')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Voltage')
     ax.legend()
-
-    # Display the plot using Streamlit's st.pyplot
     st.pyplot(fig)
-    st.empty()  # Clear the chart_placeholder
 
+# ... (rest of the code)
