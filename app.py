@@ -91,37 +91,6 @@ if run_forecast_button:
     model_fit = model.fit()
     st.write(model_fit.summary())
 
-    # Forecast for the next steps
-    st.subheader('Forecast')
-    steps = st.number_input('Enter the number of steps to forecast', 1, len(test), 10)
-    forecast = model_fit.get_forecast(steps=steps)
-    forecast_values = forecast.predicted_mean
-    st.write('Forecasted current for the next', steps, 'steps:')
-    st.write(forecast_values)
 
-    # Evaluation
-    mse = mean_squared_error(test['Current'][:steps], forecast_values)
-    rmse = np.sqrt(mse)
-    st.write('Mean Squared Error:', mse)
-    st.write('Root Mean Squared Error:', rmse)
-
-    # Plot forecast
-    st.subheader('Forecast Plot')
-    fig, ax = plt.subplots(figsize=(20, 8))
-    ax.plot(train['Current'], label='Train')
-    ax.plot(test['Current'], label='Test')
-    ax.plot(forecast_values, label='Forecast')
-    ax.set_xlabel('Timestamp')
-    ax.set_ylabel('Current')
-    ax.legend()
-    st.pyplot(fig)
-
-    # Future Predictions
-    st.subheader('Future Predictions')
-    future_steps = st.number_input('Enter the number of future steps to predict', 1, 1000, 10)
-    future_forecast_obj = model_fit.get_forecast(steps=future_steps)
-    future_forecast = future_forecast_obj.predicted_mean
-    st.write('Future forecast for the next', future_steps, 'steps:')
-    st.write(future_forecast)
 
 
