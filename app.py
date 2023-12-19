@@ -72,25 +72,3 @@ if plot_dataframe and df is not None:
             # Update the chart with the rolling average
             chart_placeholder.line_chart(rolling_avg)
 
-# Add ARIMA model fitting and forecasting section
-if run_forecast_button:
-    # Split the data into train and test sets
-    st.subheader('Train and Test Sets')
-    split = st.slider('Select the train-test split ratio', 0.5, 0.9, 0.8, 0.01)
-    train_size = int(len(df) * split)
-    train, test = df[0:train_size], df[train_size:len(df)]
-    st.write('Train set size:', len(train))
-    st.write('Test set size:', len(test))
-
-    # Fit the ARIMA model
-    st.subheader('ARIMA Model')
-    p = st.number_input('Enter the order of AR term', 0, 10, 5)
-    d = st.number_input('Enter the degree of differencing', 0, 10, 1)
-    q = st.number_input('Enter the order of MA term', 0, 10, 0)
-    model = sm.tsa.ARIMA(train['Current'], order=(p, d, q))
-    model_fit = model.fit()
-    st.write(model_fit.summary())
-
-
-
-
