@@ -119,7 +119,6 @@ if run_forecast_button:
     ax.plot(train['Voltage'], label='Train')
     ax.plot(test['Voltage'], label='Test')
     ax.plot(forecast.index, forecast.values, label='Forecast')
-    ax.fill_between(conf.index, conf.iloc[:, 0], conf.iloc[:, 1], color='k', alpha=0.2, label='Confidence Interval')
     ax.set_xlabel('Date')
     ax.set_ylabel('Voltage')
     ax.legend()
