@@ -78,7 +78,7 @@ if plot_dataframe and df is not None:
             chart_placeholder.line_chart(rolling_avg, use_container_width=True)
 
 # Run ARIMA Forecast button logic
-if run_forecast_button:
+if run_forecast_button and df is not None:
     # Split the data into train and test sets
     st.subheader('Train and Test Sets')
     split = st.slider('Select the train-test split ratio', 0.5, 0.9, 0.8, 0.01)
