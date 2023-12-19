@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta  # Import timedelta
 from datetime import time as dt_time
 import streamlit as st
 import pandas as pd
@@ -48,6 +48,7 @@ st.sidebar.image(image_url)
 display_dataframe = st.sidebar.checkbox("Display Dataframe")
 plot_dataframe = st.sidebar.checkbox("Plot Dataframe in Real-time")
 run_forecast_button = st.sidebar.checkbox("Run ARIMA Forecast")
+future_forecast_button = st.sidebar.checkbox("Future Forecast")
 
 # Load data outside the loop to avoid unnecessary data fetching
 df = load_data()
@@ -124,4 +125,33 @@ if run_forecast_button and df is not None:
     ax.legend()
     st.pyplot(fig)
 
-# ... (rest of the code)
+# Future Forecast button logic
+if future_forecast_button and df is not None:
+    st.subheader('Future Forecast')
+
+    # Get the latest timestamp in the existing data
+    latest_timestamp = df.index[-1]
+
+    # Define the number of future steps to forecast
+    future_steps = st.number_input('Enter the number of steps for future forecasting', 1, 100, 10)
+
+    # Generate future timestamps based on the latest timestamp and the desired number of steps
+    future_timestamps = [latest_timestamp + timedelta(seconds=30 * i) for i in range(1, future_steps + 1)]
+
+    # Forecast future values using the trained model
+    future_forecast_obj = model_fit.get_forecast(steps=future_steps, alpha=0.05)
+    future_forecast = future_forecast_obj.predicted_mean
+
+    # Display the future forecast
+    st.write('Future forecast for the next', future_steps, 'steps:')
+    st.write(future_forecast)
+
+    # Plot the future forecast
+    st.subheader('Future Forecast Plot')
+    fig, ax = plt.subplots(figsize=(20, 8))
+    ax.plot(df['Voltage'], label='Historical Data')
+    ax.plot(future_timestamps, future_forecast.values, label='Future Forecast')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Voltage')
+    ax.legend()
+    st.pyplot(fig)
