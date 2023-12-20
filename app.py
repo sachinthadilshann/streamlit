@@ -10,7 +10,7 @@ import numpy as np
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
 
 
-st.title('Current Forecasting using ARIMA')
+st.title('Solar Condition Monitoring System')
 st.write('This app uses ARIMA model to forecast the Current.')
 
 # Replace the URL with the actual URL of your Firebase Realtime Database
