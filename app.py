@@ -19,26 +19,23 @@ database_url = "https://solar-monitoring-system-7b380-default-rtdb.firebaseio.co
 def load_data():
     with st.spinner('Loading data...'):
         response = requests.get(database_url + ".json")
-    
+
         if response.status_code == 200:
             data = response.json()
-    
+
             solar_panel_id = '0001'
-            device_id = 'Current'  # Assuming the current data is under the 'Current' key
-    
-            # Extract the relevant nested data
+            device_id = 'Current'
+            
             nested_data = data.get('solar_panel', {}).get(solar_panel_id, {}).get(device_id, {})
-    
-            # Convert the nested data to a dataframe
+
             df = pd.DataFrame(list(nested_data.items()), columns=['Timestamp', 'Current'])
             df['Timestamp'] = pd.to_datetime(df['Timestamp'])
-            df['Current'] = pd.to_numeric(df['Current'], errors='coerce')  # Convert 'Current' to numeric
-            df = df.dropna(subset=['Current'])  # Drop rows with NaN in 'Current'
-            df.set_index('Timestamp', inplace=True)  # Set 'Timestamp' as the index
-    
-            # Resample to 5-minute intervals
-            df = df.resample('10T').mean()
-    
+            df['Current'] = pd.to_numeric(df['Current'], errors='coerce')
+            df = df.dropna(subset=['Current'])
+            df.set_index('Timestamp', inplace=True)
+
+            df_resampled = df.resample('10T').mean()
+
             return df_resampled
         else:
             st.write("Failed to retrieve data from Firebase:", response.status_code)
