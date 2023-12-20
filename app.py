@@ -17,38 +17,38 @@ st.write('This app uses ARIMA model to forecast the Current.')
 database_url = "https://solar-monitoring-system-7b380-default-rtdb.firebaseio.com/"
 
 def load_data():
-    with st.spinner('Loading data...'):
-        response = requests.get(database_url + ".json")
+    response = requests.get(database_url + ".json")
 
-        if response.status_code == 200:
-            data = response.json()
+    if response.status_code == 200:
+        data = response.json()
 
-            solar_panel_id = '0001'
-            device_id = 'Current'
-            
-            nested_data = data.get('solar_panel', {}).get(solar_panel_id, {}).get(device_id, {})
+        solar_panel_id = '0001'
+        device_id = 'Current'  # Assuming the current data is under the 'Current' key
 
-            df = pd.DataFrame(list(nested_data.items()), columns=['Timestamp', 'Current'])
-            df['Timestamp'] = pd.to_datetime(df['Timestamp'])
-            df['Current'] = pd.to_numeric(df['Current'], errors='coerce')
-            df = df.dropna(subset=['Current'])
-            df.set_index('Timestamp', inplace=True)
+        # Extract the relevant nested data
+        nested_data = data.get('solar_panel', {}).get(solar_panel_id, {}).get(device_id, {})
 
-            df_resampled = df.resample('10T').mean()
+        # Convert the nested data to a dataframe
+        df = pd.DataFrame(list(nested_data.items()), columns=['Timestamp', 'Current'])
+        df['Timestamp'] = pd.to_datetime(df['Timestamp'])
+        df['Current'] = pd.to_numeric(df['Current'], errors='coerce')  # Convert 'Current' to numeric
+        df = df.dropna(subset=['Current'])  # Drop rows with NaN in 'Current'
+        df.set_index('Timestamp', inplace=True)  # Set 'Timestamp' as the index
 
-            return df_resampled
-        else:
-            st.write("Failed to retrieve data from Firebase:", response.status_code)
-            return None
+        # Resample to 5-minute intervals
+        df_resampled = df.resample('10T').mean()
+
+        return df_resampled
+    else:
+        st.write("Failed to retrieve data from Firebase:", response.status_code)
+        return None
 
 # Add a sidebar with options
 image_url = "logo.png"
 st.sidebar.image(image_url)
 display_dataframe = st.sidebar.checkbox("Display Dataframe")
 plot_dataframe = st.sidebar.checkbox("Plot Dataframe in Real-time")
-last = st.slidebar.checkbox("Display last hour data")
 run_forecast_button = st.sidebar.checkbox("Run ARIMA Forecast")
-
 
 # Load data outside the loop to avoid unnecessary data fetching
 df = load_data()
@@ -81,24 +81,6 @@ if plot_dataframe and df is not None:
     # ... (previous code)
 
     # Run ARIMA Forecast button logic
-if last and df is not None:
-    # ... (previous code)
-
-    # Add a section to plot Firebase data for the last one hour
-    st.subheader("Firebase Data Plot (Last One Hour)")
-    
-    # Fetch and filter data for the last one hour
-    current_time = datetime.now()
-    one_hour_ago = current_time - timedelta(hours=1)
-    df_last_hour = df[df.index >= one_hour_ago]
-    
-    # Plot the last one-hour data
-    plt.plot(df_last_hour['Current'], label='Last One Hour Data')
-    plt.xlabel('Timestamp')
-    plt.ylabel('Current')
-    plt.legend()
-    st.pyplot(plt)
-
 if run_forecast_button and df is not None:
 
         X = df['Current'].values
