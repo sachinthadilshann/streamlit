@@ -46,7 +46,9 @@ image_url = "logo.png"
 st.sidebar.image(image_url)
 display_dataframe = st.sidebar.checkbox("Display Dataframe")
 plot_dataframe = st.sidebar.checkbox("Plot Dataframe in Real-time")
+last = st.slidebar.checkbox("Display last hour data")
 run_forecast_button = st.sidebar.checkbox("Run ARIMA Forecast")
+
 
 # Load data outside the loop to avoid unnecessary data fetching
 df = load_data()
@@ -79,6 +81,24 @@ if plot_dataframe and df is not None:
     # ... (previous code)
 
     # Run ARIMA Forecast button logic
+if last and df is not None:
+    # ... (previous code)
+
+# Add a section to plot Firebase data for the last one hour
+st.subheader("Firebase Data Plot (Last One Hour)")
+
+# Fetch and filter data for the last one hour
+current_time = datetime.now()
+one_hour_ago = current_time - timedelta(hours=1)
+df_last_hour = df[df.index >= one_hour_ago]
+
+# Plot the last one-hour data
+plt.plot(df_last_hour['Current'], label='Last One Hour Data')
+plt.xlabel('Timestamp')
+plt.ylabel('Current')
+plt.legend()
+st.pyplot(plt)
+
 if run_forecast_button and df is not None:
 
         X = df['Current'].values
