@@ -35,7 +35,7 @@ def load_data():
         df.set_index('Timestamp', inplace=True)  # Set 'Timestamp' as the index
 
         # Resample to 5-minute intervals
-        df = df.resample('1T').mean()
+        df = df.resample('10T').mean()
 
         return df
     else:
