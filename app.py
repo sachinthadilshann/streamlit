@@ -9,9 +9,8 @@ from statsmodels.tsa.arima.model import ARIMA
 import numpy as np
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
 
-
-st.title('Current Forecasting using ARIMA')
-st.write('This app uses ARIMA model to forecast the Current.')
+st.title('📈Solar Condition Monitoring System')
+st.write('This app uses ARIMA model to forecast the Data.')
 
 # Replace the URL with the actual URL of your Firebase Realtime Database
 database_url = "https://solar-monitoring-system-7b380-default-rtdb.firebaseio.com/"
@@ -36,9 +35,9 @@ def load_data():
         df.set_index('Timestamp', inplace=True)  # Set 'Timestamp' as the index
 
         # Resample to 5-minute intervals
-        df_resampled = df.resample('30S').mean()
+        df = df.resample('1T').mean()
 
-        return df_resampled
+        return df
     else:
         st.write("Failed to retrieve data from Firebase:", response.status_code)
         return None
@@ -53,17 +52,18 @@ run_forecast_button = st.sidebar.checkbox("Run ARIMA Forecast")
 # Load data outside the loop to avoid unnecessary data fetching
 df = load_data()
 
+# Add a numeric input in the sidebar for future forecasting
+num_forecast_steps = st.sidebar.number_input("Number of Future Steps to Forecast", min_value=1, max_value=1000, value=10)
+
 # Display dataframe if selected in the sidebar
 if display_dataframe and df is not None:
     st.subheader("Displaying Dataframe")
-
     # Display the filtered dataframe
     st.write(df)
 
 # Plot dataframe in real-time with a rolling average if selected in the sidebar
 if plot_dataframe and df is not None:
     st.subheader("Plotting dataset")
-
     # Create a placeholder for the chart
     chart_placeholder = st.empty()
 
@@ -78,61 +78,64 @@ if plot_dataframe and df is not None:
             # Clear the previous chart and update with the new data
             chart_placeholder.line_chart(rolling_avg, use_container_width=True)
 
-    # ... (previous code)
-
-    # Run ARIMA Forecast button logic
+# Run ARIMA Forecast button logic
 if run_forecast_button and df is not None:
+    X = df['Current'].values
 
-        X = df['Current'].values
+    # Split the data into training and testing sets (80% training, 20% testing)
+    size = int(len(X) * 0.8)
+    train, test = X[:size], X[size:]
 
-        # Split the data into training and testing sets (80% training, 20% testing)
-        size = int(len(X) * 0.8)
-        train, test = X[:size], X[size:]
+    # Initialize a list to store the training data
+    history = [x for x in train]
 
-        # Initialize a list to store the training data
-        history = [x for x in train]
+    # Initialize a list to store the predicted values
+    predictions = []
 
-        # Initialize a list to store the predicted values
-        predictions = []
+    # Loop through the testing set to make predictions
+    for t in range(len(test)):
+        # Try different orders
+        model = ARIMA(history, order=(5, 2, 1))
+        try:
+            model_fit = model.fit()
+        except ConvergenceWarning:
+            # Handle convergence warning, try different orders or methods
+            continue
 
-        # Loop through the testing set to make predictions
-        for t in range(len(test)):
-            # Try different orders
-            model = ARIMA(history, order=(5, 2, 1))
-            try:
-                model_fit = model.fit()
-            except ConvergenceWarning:
-                # Handle convergence warning, try different orders or methods
-                continue
+        output = model_fit.forecast()
+        yhat = output[0]
+        predictions.append(yhat)
+        obs = test[t]
+        history.append(obs)
 
-            output = model_fit.forecast()
-            yhat = output[0]
-            predictions.append(yhat)
-            obs = test[t]
-            history.append(obs)
-            #st.write(f'Predicted: {yhat:.2f}, Expected: {obs:.2f}')
+    # Forecast future values
+    for _ in range(num_forecast_steps):
+        model = ARIMA(history, order=(5, 2, 1))
+        try:
+            model_fit = model.fit()
+        except ConvergenceWarning:
+            # Handle convergence warning, try different orders or methods
+            continue
 
-        # Evaluate the model
-        mse = mean_squared_error(test, predictions)
-        rmse = np.sqrt(mse)
-        st.subheader('Model Evaluation')
-        st.write('Mean Squared Error:', mse)
-        st.write('Root Mean Squared Error:', rmse)
+        output = model_fit.forecast()
+        yhat = output[0]
+        predictions.append(yhat)
+        history.append(yhat)
 
-        # Plot the actual vs. predicted values
-        st.subheader('Actual vs. Predicted Plot')
-        plt.plot(test, label='Actual')
-        plt.plot(predictions, label='Predicted')
-        plt.legend()
-        st.pyplot(plt)
+    # Evaluate the model
+    mse = mean_squared_error(test, predictions[:len(test)])
+    rmse = np.sqrt(mse)
+    st.subheader('Model Evaluation')
+    st.write('Mean Squared Error:', mse)
+    st.write('Root Mean Squared Error:', rmse)
 
-        st.subheader('Forecast Plot')
-        # Forecast Plot
-        fig, ax = plt.subplots(figsize=(20, 8))
-        ax.plot(X, label='Historical Data')
-        ax.plot(np.arange(size, size + len(test)), test, label='Test')
-        ax.plot(np.arange(size, size + len(test)), predictions, label='Forecast')
-        ax.set_xlabel('Data Point')
-        ax.set_ylabel('Current')
-        ax.legend()
-        st.pyplot(fig)
+    st.subheader('Forecast Plot')
+    # Forecast Plot
+    fig, ax = plt.subplots(figsize=(20, 8))
+    ax.plot(X, label='Historical Data')
+    ax.plot(np.arange(size, size + len(test)), test, label='Test')
+    ax.plot(np.arange(size, size + len(test) + num_forecast_steps), predictions, label='Forecast')
+    ax.set_xlabel('Data Point')
+    ax.set_ylabel('Current')
+    ax.legend()
+    st.pyplot(fig)
