@@ -37,7 +37,7 @@ def load_data():
         df.set_index('Timestamp', inplace=True)  # Set 'Timestamp' as the index
 
         # Resample to 5-minute intervals
-        df = df.resample('10T').mean()
+        #df = df.resample('10T').mean()
 
         return df
     else:
@@ -99,7 +99,7 @@ if run_forecast_button and df is not None:
         # Loop through the testing set to make predictions
         for t in range(len(test)):
             # Try different orders
-            model = ARIMA(history, order=(5, 2, 1))
+            model = ARIMA(history, order=(1, 1, 1))
             try:
                 model_fit = model.fit()
             except ConvergenceWarning:
