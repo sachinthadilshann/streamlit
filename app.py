@@ -8,6 +8,7 @@ from sklearn.metrics import mean_squared_error
 from statsmodels.tsa.arima.model import ARIMA
 import numpy as np
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
+import matplotlib.dates as mdates
 
 
 st.title('Solar Condition Monitoring System')
@@ -120,11 +121,11 @@ if run_forecast_button and df is not None:
         st.write('Root Mean Squared Error:', rmse)
 
         # Plot the actual vs. predicted values
-        st.subheader('Actual vs. Predicted Plot')
-        plt.plot(test, label='Actual')
-        plt.plot(predictions, label='Predicted')
-        plt.legend()
-        st.pyplot(plt)
+        #st.subheader('Actual vs. Predicted Plot')
+        #plt.plot(test, label='Actual')
+        #plt.plot(predictions, label='Predicted')
+        #plt.legend()
+        #st.pyplot(plt)
 
         st.subheader('Forecast Plot')
         # Forecast Plot
@@ -136,3 +137,14 @@ if run_forecast_button and df is not None:
         ax.set_ylabel('Current')
         ax.legend()
         st.pyplot(fig)
+
+        st.subheader('Actual vs. Predicted Plot with Timestamps')
+        plt.plot(df.index[size:], test, label='Actual')
+        plt.plot(predictions_df.index, predictions_df['Predicted'], label='Predicted')
+        plt.xlabel('Timestamp')
+        plt.ylabel('Current')
+        plt.title('Actual vs. Predicted Plot with Timestamps')
+        plt.xticks(rotation=45)
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))  # Format timestamp
+        plt.legend()
+        st.pyplot(plt)
