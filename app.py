@@ -110,7 +110,7 @@ if run_forecast_button and df is not None:
             predictions.append(yhat)
             obs = test[t]
             history.append(obs)
-            st.write(f'Predicted: {yhat:.2f}, Expected: {obs:.2f}')
+            #st.write(f'Predicted: {yhat:.2f}, Expected: {obs:.2f}')
 
         # Evaluate the model
         mse = mean_squared_error(test, predictions)
