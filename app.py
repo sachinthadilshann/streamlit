@@ -8,10 +8,9 @@ from sklearn.metrics import mean_squared_error
 from statsmodels.tsa.arima.model import ARIMA
 import numpy as np
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
-import matplotlib.dates as mdates
 
 
-st.title('Solar Condition Monitoring System')
+st.title('Current Forecasting using ARIMA')
 st.write('This app uses ARIMA model to forecast the Current.')
 
 # Replace the URL with the actual URL of your Firebase Realtime Database
@@ -37,9 +36,9 @@ def load_data():
         df.set_index('Timestamp', inplace=True)  # Set 'Timestamp' as the index
 
         # Resample to 5-minute intervals
-        df = df.resample('10T').mean()
+        df_resampled = df.resample('30S').mean()
 
-        return df
+        return df_resampled
     else:
         st.write("Failed to retrieve data from Firebase:", response.status_code)
         return None
@@ -99,7 +98,7 @@ if run_forecast_button and df is not None:
         # Loop through the testing set to make predictions
         for t in range(len(test)):
             # Try different orders
-            model = ARIMA(history, order=(1, 1, 1))
+            model = ARIMA(history, order=(5, 2, 1))
             try:
                 model_fit = model.fit()
             except ConvergenceWarning:
@@ -121,11 +120,11 @@ if run_forecast_button and df is not None:
         st.write('Root Mean Squared Error:', rmse)
 
         # Plot the actual vs. predicted values
-        #st.subheader('Actual vs. Predicted Plot')
-        #plt.plot(test, label='Actual')
-        #plt.plot(predictions, label='Predicted')
-        #plt.legend()
-        #st.pyplot(plt)
+        st.subheader('Actual vs. Predicted Plot')
+        plt.plot(test, label='Actual')
+        plt.plot(predictions, label='Predicted')
+        plt.legend()
+        st.pyplot(plt)
 
         st.subheader('Forecast Plot')
         # Forecast Plot
@@ -137,5 +136,3 @@ if run_forecast_button and df is not None:
         ax.set_ylabel('Current')
         ax.legend()
         st.pyplot(fig)
-
-
