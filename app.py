@@ -138,13 +138,4 @@ if run_forecast_button and df is not None:
         ax.legend()
         st.pyplot(fig)
 
-        st.subheader('Actual vs. Predicted Plot with Timestamps')
-        plt.plot(df.index[size:], test, label='Actual')
-        plt.plot(predictions_df.index, predictions_df['Predicted'], label='Predicted')
-        plt.xlabel('Timestamp')
-        plt.ylabel('Current')
-        plt.title('Actual vs. Predicted Plot with Timestamps')
-        plt.xticks(rotation=45)
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))  # Format timestamp
-        plt.legend()
-        st.pyplot(plt)
+
