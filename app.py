@@ -37,9 +37,9 @@ def load_data():
         df.set_index('Timestamp', inplace=True)  # Set 'Timestamp' as the index
 
         # Resample to 5-minute intervals
-        df_resampled = df.resample('10T').mean()
+        df = df.resample('10T').mean()
 
-        return df_resampled
+        return df
     else:
         st.write("Failed to retrieve data from Firebase:", response.status_code)
         return None
