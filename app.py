@@ -15,7 +15,6 @@ st.write('This app uses ARIMA model to forecast the Data.')
 database_url = 'https://xion-solar-9fc15-default-rtdb.firebaseio.com'
 
 
-
 def load_data():
     response = requests.get(database_url + ".json")
 
