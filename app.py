@@ -9,7 +9,6 @@ from statsmodels.tsa.arima.model import ARIMA
 import numpy as np
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
 
-
 st.title('📈Solar Condition Monitoring System')
 st.write('This app uses ARIMA model to forecast the Data.')
 
@@ -27,13 +26,11 @@ def load_data():
         df['Current'] = pd.to_numeric(df['Current'], errors='coerce')
         df = df.dropna(subset=['Current'])
         df.set_index('Timestamp', inplace=True)
-        #df = df.resample('10T').mean()
 
         return df
     else:
         st.write("Failed to retrieve data from Firebase:", response.status_code)
         return None
-
 
 image_url = "logo.png"
 st.sidebar.image(image_url)
@@ -60,32 +57,18 @@ if plot_dataframe and df is not None:
             rolling_avg = df_filtered['Current'].rolling(window=5).mean()
             chart_placeholder.line_chart(rolling_avg, use_container_width=True)
 
-
 if run_forecast_button and df is not None:
 
     df = df.dropna(subset=['Current'])
     X = df['Current'].values
-
 
     size = int(len(X) * 0.8)
     train, test = X[:size], X[size:]
     history = [x for x in train]
     predictions = []
 
-    for t in range(len(test)):
-        model = ARIMA(history, order=(1, 1, 1))
-        try:
-            model_fit = model.fit()
-        except ConvergenceWarning:
-            continue
-
-        output = model_fit.forecast()
-        yhat = output[0]
-        predictions.append(yhat)
-        obs = test[t]
-        history.append(obs)
-
     # Forecast future values
+    future_timestamps = pd.date_range(df.index[-1], periods=num_forecast_steps + 1, freq='10T')[1:]
     for _ in range(num_forecast_steps):
         model = ARIMA(history, order=(5, 2, 1))
         try:
@@ -98,6 +81,9 @@ if run_forecast_button and df is not None:
         predictions.append(yhat)
         history.append(yhat)
 
+    # Convert future timestamps to datetime format
+    future_dates = pd.to_datetime(future_timestamps)
+
     # Evaluate the model
     mse = mean_squared_error(test, predictions[:len(test)])
     rmse = np.sqrt(mse)
@@ -108,10 +94,10 @@ if run_forecast_button and df is not None:
     st.subheader('Forecast Plot')
     # Forecast Plot
     fig, ax = plt.subplots(figsize=(20, 8))
-    ax.plot(X, label='Historical Data')
-    ax.plot(np.arange(size, size + len(test)), test, label='Test')
-    ax.plot(np.arange(size, size + len(test) + num_forecast_steps), predictions, label='Forecast')
-    ax.set_xlabel('Data Point')
+    ax.plot(df.index, X, label='Historical Data')
+    ax.plot(df.index[size:size + len(test)], test, label='Test')
+    ax.plot(future_dates, predictions, label='Forecast')
+    ax.set_xlabel('Timestamp')
     ax.set_ylabel('Current')
     ax.legend()
     st.pyplot(fig)
