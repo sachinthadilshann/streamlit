@@ -12,8 +12,9 @@ from statsmodels.tools.sm_exceptions import ConvergenceWarning
 st.title('📈Solar Condition Monitoring System')
 st.write('This app uses ARIMA model to forecast the Data.')
 
-# Replace the URL with the actual URL of your Firebase Realtime Database
-database_url = "https://xion-solar-9fc15-default-rtdb.firebaseio.com/"
+database_url = 'https://xion-solar-9fc15-default-rtdb.firebaseio.com'
+
+
 
 def load_data():
     response = requests.get(database_url + ".json")
